@@ -1,6 +1,4 @@
-# Project Title
-
-The tasks assignment
+# The tasks assignment
 
 ## Getting Started
 
