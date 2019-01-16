@@ -1,6 +1,8 @@
 <?php
 
 require 'helper.php';
+
+// Delete task from database
 if(!empty($_POST['id'])) {
 	$id = htmlspecialchars(filter_input(INPUT_POST, 'id', FILTER_SANITIZE_NUMBER_INT));
 	$query = "DELETE FROM tasks_list WHERE id = '$id'";

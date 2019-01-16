@@ -1,6 +1,6 @@
-$(document).ready(function() {
+$(document).ready(function () {
 
-  var taskCounter,completedCounter,remainedCounter;
+  var taskCounter, completedCounter, remainedCounter;
 
   // Get tasks from database for the first time
   $.get('server/tasks.php', function (data) {
@@ -23,96 +23,105 @@ $(document).ready(function() {
           '<button type="button" tabindex="-1" role="dialog" class="action-button action-button--delete" data-toggle="modal" data-title="' + this.title + '"  data-id="' + this.id + '" data-status="' + this.status + '" data-target="#delete-task-modal">Delete</button>' +
           '</td></tr>'
         );
+        // Count by status
         if (this.status == 'Completed') {
           completedCounter++;
         }
       });
+
       remainedCounter = taskCounter - completedCounter;
 
+      // Render the counters.
       $('#total-counter').text(taskCounter);
       $('#completed-counter').text(completedCounter);
       $('#remained-counter').text(remainedCounter);
     }
-    catch(e) {
+    catch (e) {
       console.log(data);
     }
   });
 
   // Add task
-  $('#add-task-button').on('click',function() {
+  $('#add-task-button').on('click', function () {
 
     var title = $('#new-task').val();
 
-  if( title ) {
+    if (title) {
+      var status = $('#new-task-status').val();
 
-    var status = $('#new-task-status').val();
+      $.ajax({
+        url: "server/add-task.php",
+        type: "post",
+        data: {title: title, status: status},
+        success: function (response) {
+          try {
+            var newTask = JSON.parse(response);
+            var id = newTask.id;
+            var create = newTask.date;
+            var status = newTask.status;
+            // Render the counter and new task row.
+            taskCounter++;
+            $('#task-table').append(
+              '<tr id="task' + id + '"><td>'
+              + id
+              + '</td><td  class="title">'
+              + title
+              + '</td><td>'
+              + create
+              + '</td><td>' +
+              '<button type="button" tabindex="-1" role="dialog" class="action-button action-button--edit" data-toggle="modal" data-title="' + title + '" data-id="' + id + '" data-status="' + status + '" data-target="#edit-task-modal">Edit</button>' +
+              '/' +
+              '<button type="button" tabindex="-1" role="dialog" class="action-button action-button--delete" data-toggle="modal" data-title="' + title + '" data-id="' + id + '" data-status="' + status + '" data-target="#delete-task-modal">Delete</button>' +
+              '</td></tr>'
+            );
 
-    $.ajax({
-      url: "server/add-task.php",
-      type: "post",
-      data: {title: title , status: status} ,
-      success: function (response) {
-        try {
-          var newTask = JSON.parse(response);
-          var id = newTask.id;
-          var create = newTask.create;
-          var status = newTask.status;
-          taskCounter++;
-          $('#task-table').append(
-            '<tr id="task' + id + '"><td>'
-            + id
-            + '</td><td  class="title">'
-            + title
-            + '</td><td>'
-            + create
-            + '</td><td>' +
-            '<button type="button" tabindex="-1" role="dialog" class="action-button action-button--edit" data-toggle="modal" data-title="' + title + '" data-id="' + id + '" data-status="' + status + '" data-target="#edit-task-modal">Edit</button>' +
-            '/' +
-            '<button type="button" tabindex="-1" role="dialog" class="action-button action-button--delete" data-toggle="modal" data-title="' + title + '" data-id="' + id + '" data-status="' + status + '" data-target="#delete-task-modal">Delete</button>' +
-            '</td></tr>'
-          );
+            $('#new-task').val('');
 
-          $('#new-task').val('');
-
-          $('#total-counter').text(taskCounter);
-          if (status == 'Completed') {
-            completedCounter++;
-            $('#completed-counter').text(completedCounter);
+            // Render completed and remained counters.
+            $('#total-counter').text(taskCounter);
+            if (status == 'Completed') {
+              completedCounter++;
+              $('#completed-counter').text(completedCounter);
+            }
+            else {
+              remainedCounter++;
+              $('#remained-counter').text(remainedCounter);
+            }
           }
-          else {
-            remainedCounter++;
-            $('#remained-counter').text(remainedCounter);
+          catch (e) {
+            $('.error-div').html(response);
           }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.log(textStatus, errorThrown);
         }
-        catch (e) {
-          $('.error-div').text(response);
-        }
-      },
-      error: function(jqXHR, textStatus, errorThrown) {
-        console.log(textStatus, errorThrown);
-      }
-    });
+      });
 
-  }
-
+    }
+    else {
+      $('.error-div').text('The task title is empty, please insert a valid title');
+    }
   });
 
-  var taskRemoveId,taskRemoveStatus;
   // Delete task
-  $("body").on('click', '.action-button--delete',function () {
+  var taskRemoveId, taskRemoveStatus;
+
+  $("body").on('click', '.action-button--delete', function () {
+    // Get the removed task data.
     taskRemoveId = $(this).data('id');
     taskRemoveStatus = $(this).data('status');
     $('#delete-task-modal .modal-title').text('Delete task no.' + taskRemoveId);
     $('#delete-task-modal .task-title-modal').text($(this).data('title'));
   });
 
-  $('#delete-task-button').on('click', function(){
+  $('#delete-task-button').on('click', function () {
     $.ajax({
       url: "server/delete-task.php",
       type: "post",
-      data: {id: taskRemoveId } ,
+      data: {id: taskRemoveId},
       success: function (response) {
         if (response == 'success') {
+          // Remove task from the html and update counters.
           $('#task' + taskRemoveId).remove();
           taskCounter--;
           $('#total-counter').text(taskCounter);
@@ -130,17 +139,16 @@ $(document).ready(function() {
         }
 
       },
-      error: function(jqXHR, textStatus, errorThrown) {
+      error: function (jqXHR, textStatus, errorThrown) {
         console.log(textStatus, errorThrown);
       }
     });
-
-
   });
 
   // Edit task
-  var taskEditId,taskEditTitle,taskEditStatus;
-  $("body").on('click', '.action-button--edit',function () {
+  var taskEditId, taskEditTitle, taskEditStatus;
+  $("body").on('click', '.action-button--edit', function () {
+    // Get task old data.
     taskEditId = $(this).data('id');
     taskEditTitle = $(this).data('title');
     taskEditStatus = $(this).data('status');
@@ -149,31 +157,35 @@ $(document).ready(function() {
     $('#edit-task-status').val(taskEditStatus);
   });
 
-  $("body").on('click','#edit-task-button', function() {
+  $("body").on('click', '#edit-task-button', function () {
+    // Get task new data.
     var taskChangedTitle = $('#edit-task').val();
     var taskChangedStatus = $('#edit-task-status').val();
     $.ajax({
       url: "server/edit-task.php",
       type: "post",
-      data: {id: taskEditId, title: taskChangedTitle, status: taskChangedStatus},
+      data: {
+        id: taskEditId,
+        title: taskChangedTitle,
+        status: taskChangedStatus
+      },
       success: function (response) {
         if (response == 'success') {
           $('#task' + taskEditId + ' .title').html(taskChangedTitle);
           $('#task' + taskEditId + ' .action-button--edit').data('title', taskChangedTitle);
           if (taskEditStatus != taskChangedStatus) {
             $('#task' + taskEditId + ' .action-button--edit').data('status', taskChangedStatus);
+            // If status has changed, update the rendered counters.
             if (taskChangedStatus == 'Completed') {
               completedCounter++;
               remainedCounter--;
-              $('#completed-counter').text(completedCounter);
-              $('#remained-counter').text(remainedCounter);
             }
             else {
               completedCounter--;
               remainedCounter++;
-              $('#completed-counter').text(completedCounter);
-              $('#remained-counter').text(remainedCounter);
             }
+            $('#completed-counter').text(completedCounter);
+            $('#remained-counter').text(remainedCounter);
           }
         }
         else {
@@ -186,11 +198,11 @@ $(document).ready(function() {
     });
   });
 
-  $('.task-button').on('click', function() {
+  $('.task-button').on('click', function () {
     $('.error-div').text('');
   });
 
-  $("body").on('click','.action-button', function() {
+  $("body").on('click', '.action-button', function () {
     $('.error-div').text('');
   });
 

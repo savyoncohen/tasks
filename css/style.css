@@ -139,6 +139,10 @@ td {
   margin-top: 1rem; }
 
 .row.error-div {
-  color: #DC143C; }
+  color: #DC143C;
+  font-size: 1.5rem; }
+
+.table-div {
+  margin-bottom: 3rem; }
 
 /*# sourceMappingURL=style.css.map */
