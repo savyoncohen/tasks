@@ -3,20 +3,18 @@
 require 'helper.php';
 
 // Add new Task.
-if (isset($_POST['title']) && isset($_POST['status'])) {
-	// Clean the inserted data.
-	$title = htmlspecialchars(filter_input(INPUT_POST, 'title', FILTER_SANITIZE_STRING));
-	$status = htmlspecialchars(filter_input(INPUT_POST, 'status', FILTER_SANITIZE_STRING));
+if(isset($_POST['myData'])){
+	$data = json_decode($_POST['myData']);
 	$date = date('Y-m-d H:i:s');
 
-	$query = "INSERT INTO tasks_list (title,status, created) VALUES ('" . $title . "'," . "'$status'," . "'$date')";
+	$query = "INSERT INTO tasks_list (title,status, created) VALUES ('" . $data->title . "'," . "'$data->status'," . "'$date')";
 	$connection = connect();
 	if (!$connection->error) {
 		if (mysqli_query($connection, $query)) {
 			$last_id = mysqli_insert_id($connection);
 			$success->id = $last_id;
 			$success->date = $date;
-			$success->status = $status;
+			$success->status = $data->status;
 			// Send the data back
 			echo json_encode($success);
 		} else {

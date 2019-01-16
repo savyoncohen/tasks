@@ -2,19 +2,17 @@
 require 'helper.php';
 
 // Edit an existing task
-if (!empty($_POST['id']) && !empty($_POST['title']) && !empty($_POST['status'])) {
-	$id = htmlspecialchars(filter_input(INPUT_POST, 'id', FILTER_SANITIZE_NUMBER_INT));
-	$title = htmlspecialchars(filter_input(INPUT_POST, 'title', FILTER_SANITIZE_STRING));
-	$status = htmlspecialchars(filter_input(INPUT_POST, 'status', FILTER_SANITIZE_STRING));
+if(isset($_POST['myData'])){
+	$data = json_decode($_POST['myData']);
 
 	$connection = connect();
 	if (!$connection->error) {
-		$query = "UPDATE tasks_list SET title = '$title',status = '$status' WHERE id = '$id'";
+		$query = "UPDATE tasks_list SET title = '$data->title',status = '$data->status' WHERE id = '$data->id'";
 		if ($success = mysqli_query($connection, $query)) {
 			echo 'success';
 		}
 		else {
-			echo "Error occurred during editing task no. $id" . "<br>" . mysqli_error($connection);
+			echo "Error occurred during editing task no. $data->id" . "<br>" . mysqli_error($connection);
 		}
 	}
 }

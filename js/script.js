@@ -48,11 +48,13 @@ $(document).ready(function () {
 
     if (title) {
       var status = $('#new-task-status').val();
+      var postData = {"title": title, "status": status};
+      var dataString = JSON.stringify(postData);
 
       $.ajax({
         url: "server/add-task.php",
         type: "post",
-        data: {title: title, status: status},
+        data: {myData: dataString},
         success: function (response) {
           try {
             var newTask = JSON.parse(response);
@@ -115,10 +117,12 @@ $(document).ready(function () {
   });
 
   $('#delete-task-button').on('click', function () {
+    var postData = {"id": taskRemoveId};
+    var dataString = JSON.stringify(postData);
     $.ajax({
       url: "server/delete-task.php",
       type: "post",
-      data: {id: taskRemoveId},
+      data: {myData: dataString},
       success: function (response) {
         if (response == 'success') {
           // Remove task from the html and update counters.
@@ -161,14 +165,12 @@ $(document).ready(function () {
     // Get task new data.
     var taskChangedTitle = $('#edit-task').val();
     var taskChangedStatus = $('#edit-task-status').val();
+    var postData = {"id": taskEditId, "title": taskChangedTitle, "status": taskChangedStatus };
+    var dataString = JSON.stringify(postData);
     $.ajax({
       url: "server/edit-task.php",
       type: "post",
-      data: {
-        id: taskEditId,
-        title: taskChangedTitle,
-        status: taskChangedStatus
-      },
+      data: { myData: dataString },
       success: function (response) {
         if (response == 'success') {
           $('#task' + taskEditId + ' .title').html(taskChangedTitle);
