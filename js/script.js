@@ -3,7 +3,7 @@ $(document).ready(function () {
   var taskCounter, completedCounter, remainedCounter;
 
   // Get tasks from database for the first time
-  $.get('server/tasks.php', function (data) {
+  $.get('server/tasks.php?data=data', function (data) {
     try {
       var tasks = JSON.parse(data);
       taskCounter = tasks.length;
@@ -52,9 +52,9 @@ $(document).ready(function () {
       var dataString = JSON.stringify(postData);
 
       $.ajax({
-        url: "server/add-task.php",
+        url: "server/tasks.php",
         type: "post",
-        data: {myData: dataString},
+        data: {addData: dataString},
         success: function (response) {
           try {
             var newTask = JSON.parse(response);
@@ -120,9 +120,9 @@ $(document).ready(function () {
     var postData = {"id": taskRemoveId};
     var dataString = JSON.stringify(postData);
     $.ajax({
-      url: "server/delete-task.php",
+      url: "server/tasks.php",
       type: "post",
-      data: {myData: dataString},
+      data: {deleteData: dataString},
       success: function (response) {
         if (response == 'success') {
           // Remove task from the html and update counters.
@@ -168,9 +168,9 @@ $(document).ready(function () {
     var postData = {"id": taskEditId, "title": taskChangedTitle, "status": taskChangedStatus };
     var dataString = JSON.stringify(postData);
     $.ajax({
-      url: "server/edit-task.php",
+      url: "server/tasks.php",
       type: "post",
-      data: { myData: dataString },
+      data: { editData: dataString },
       success: function (response) {
         if (response == 'success') {
           $('#task' + taskEditId + ' .title').html(taskChangedTitle);
